@@ -1,0 +1,21 @@
+{
+  "name": "mattermost-cli",
+  "version": "0.1.0",
+  "description": "CLI tool for interacting with Mattermost servers via the REST API",
+  "type": "module",
+  "bin": {
+    "mm": "./bin/mm.ts"
+  },
+  "scripts": {
+    "dev": "bun run bin/mm.ts",
+    "test": "bun test",
+    "typecheck": "bun --bun tsc --noEmit"
+  },
+  "dependencies": {
+    "citty": "^0.1.6"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.7.0"
+  }
+}

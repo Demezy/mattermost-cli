@@ -1,0 +1,20 @@
+services:
+  mattermost:
+    image: mattermost/mattermost-preview:latest
+    container_name: mm-cli-test
+    ports:
+      - "8065:8065"
+    environment:
+      - MM_SERVICESETTINGS_SITEURL=http://localhost:8065
+      - MM_SERVICESETTINGS_ENABLELOCALMODE=true
+      - MM_SERVICESETTINGS_ENABLEUSERACCESSTOKENS=true
+      - MM_TEAMSETTINGS_ENABLEOPENSERVER=true
+      - MM_LOGSETTINGS_CONSOLELEVEL=ERROR
+      - MM_LOGSETTINGS_FILELEVEL=ERROR
+    healthcheck:
+      test: ["CMD", "/mm/mattermost/bin/mmctl", "--local", "system", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    restart: "no"
