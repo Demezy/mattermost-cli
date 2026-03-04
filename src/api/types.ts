@@ -75,6 +75,7 @@ export interface ChannelMember {
   mention_count: number
   last_viewed_at: number
   last_update_at: number
+  notify_props?: { mark_unread?: string }
 }
 
 /**
@@ -139,4 +140,6 @@ export interface MattermostClient {
   getChannelMembersForUser(teamId: string): Promise<ChannelMember[]>
   createDirectChannel(userIds: [string, string]): Promise<Channel>
   addReaction(reaction: { user_id: string; post_id: string; emoji_name: string }): Promise<Reaction>
+  viewChannel(userId: string, channelId: string): Promise<void>
+  markThreadAsRead(userId: string, teamId: string, threadId: string, timestamp: number): Promise<void>
 }

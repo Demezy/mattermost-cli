@@ -45,6 +45,14 @@ beforeAll(() => {
         return Response.json({ id: "p-new", message: "created" })
       }
 
+      if (path === "/api/v4/channels/members/u1/view" && req.method === "POST") {
+        return Response.json({ status: "OK" })
+      }
+
+      if (path.match(/\/api\/v4\/users\/u1\/teams\/t1\/threads\/p1\/read\/\d+/) && req.method === "PUT") {
+        return Response.json({ status: "OK" })
+      }
+
       return Response.json({ message: "Not Found" }, { status: 404 })
     },
   })
@@ -135,5 +143,31 @@ describe("read-only mode", () => {
 
     const post = await client.createPost({ channel_id: "ch1", message: "hello" })
     expect(post.id).toBe("p-new")
+  })
+})
+
+describe("viewChannel", () => {
+  it("sends POST to correct path", async () => {
+    const client = createClient({ url: baseUrl, token: "test-token" })
+    await client.viewChannel("u1", "ch1")
+    // No error means the request was accepted (route matched)
+  })
+
+  it("is blocked by read-only mode", () => {
+    const client = createClient({ url: baseUrl, token: "test-token", readOnly: true })
+    expect(() => client.viewChannel("u1", "ch1")).toThrow(ReadOnlyError)
+  })
+})
+
+describe("markThreadAsRead", () => {
+  it("sends PUT to correct path", async () => {
+    const client = createClient({ url: baseUrl, token: "test-token" })
+    await client.markThreadAsRead("u1", "t1", "p1", 1700000000000)
+    // No error means the request was accepted (route matched)
+  })
+
+  it("is blocked by read-only mode", () => {
+    const client = createClient({ url: baseUrl, token: "test-token", readOnly: true })
+    expect(() => client.markThreadAsRead("u1", "t1", "p1", 1700000000000)).toThrow(ReadOnlyError)
   })
 })

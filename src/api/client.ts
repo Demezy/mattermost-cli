@@ -98,5 +98,13 @@ export function createClient(config: ClientConfig): MattermostClient {
     createDirectChannel: (userIds) => request<Channel>("POST", "/channels/direct", userIds),
 
     addReaction: (reaction) => request<Reaction>("POST", "/reactions", reaction),
+
+    viewChannel: async (userId, channelId) => {
+      await request<unknown>("POST", `/channels/members/${userId}/view`, { channel_id: channelId })
+    },
+
+    markThreadAsRead: async (userId, teamId, threadId, timestamp) => {
+      await request<unknown>("PUT", `/users/${userId}/teams/${teamId}/threads/${threadId}/read/${timestamp}`)
+    },
   }
 }
