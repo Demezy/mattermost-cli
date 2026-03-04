@@ -14,6 +14,11 @@ export default defineCommand({
       type: "string",
       description: "Team ID (overrides MM_TEAM_ID)",
     },
+    "show-muted": {
+      type: "boolean",
+      description: "Include muted channels (hidden by default)",
+      default: false,
+    },
   },
   async run({ args }) {
     const config = loadConnectionConfig()
@@ -33,14 +38,16 @@ export default defineCommand({
 
     const channelMap = new Map(channels.map((ch) => [ch.id, ch]))
 
-    const unread: Array<{ channel: typeof channels[0]; unreadCount: number; mentionCount: number }> = []
+    const unread: Array<{ channel: typeof channels[0]; unreadCount: number; mentionCount: number; muted: boolean }> = []
 
     for (const member of members) {
       const channel = channelMap.get(member.channel_id)
       if (!channel) continue
+      const muted = member.notify_props?.mark_unread === "mention"
+      if (muted && !args["show-muted"]) continue
       const unreadCount = channel.total_msg_count - member.msg_count
       if (unreadCount <= 0 && member.mention_count <= 0) continue
-      unread.push({ channel, unreadCount, mentionCount: member.mention_count })
+      unread.push({ channel, unreadCount, mentionCount: member.mention_count, muted })
     }
 
     // Sort by mention count (desc), then unread count (desc)
@@ -55,6 +62,7 @@ export default defineCommand({
             type: u.channel.type,
             unread: u.unreadCount,
             mentions: u.mentionCount,
+            muted: u.muted,
           })),
         ),
       )
