@@ -46,6 +46,12 @@ docker-setup: docker-down docker-up
     @sleep 30
     just docker-init
 
-# Open test instance in browser
+# Open test instance in browser and print login credentials
 docker-open:
+    @echo "Credentials:"
+    @echo "  admin    / Admin123!"
+    @echo "  alice    / alicealice123"
+    @echo "  bob      / bobbob123"
+    @echo "  charlie  / charliecharlie123"
+    @echo ""
     open http://localhost:8065
