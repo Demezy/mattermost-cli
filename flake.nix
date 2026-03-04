@@ -29,7 +29,7 @@
         {
           mm = pkgs.stdenv.mkDerivation {
             pname = "mm";
-            version = "0.1.0";
+            version = (builtins.fromJSON (builtins.readFile ./package.json)).version;
             src = ./.;
 
             nativeBuildInputs = [
