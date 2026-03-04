@@ -1,9 +1,10 @@
 import { defineCommand } from "citty"
+import packageJson from "../../package.json"
 
 export const mainCommand = defineCommand({
   meta: {
     name: "mm",
-    version: "0.1.0",
+    version: packageJson.version,
     description: "CLI tool for interacting with Mattermost servers",
   },
   subCommands: {
