@@ -82,6 +82,7 @@ mm channels   — List your channels (with optional name filter)
 mm delete     — Delete your own post
 mm dm         — Send a direct message
 mm edit       — Edit your own post
+mm mark-read  — Mark a channel or thread as read
 mm me         — Show current user info
 mm post       — Get a single post with its author
 mm posts      — List recent posts in a channel
@@ -127,6 +128,7 @@ mm search --from alice --channel dev "error"
 
 # Unread
 mm unread                         # channels with unread posts
+mm unread --show-muted            # include muted channels
 ```
 
 ### Writing
@@ -151,6 +153,10 @@ mm react 8f3kx7... thumbsup
 
 # Delete a post (requires --confirm)
 mm delete 8f3kx7... --confirm
+
+# Mark as read
+mm mark-read town-square          # mark channel as read
+mm mark-read 8f3kx7... --thread   # mark thread as read
 ```
 
 ### Global flags

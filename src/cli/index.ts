@@ -12,6 +12,7 @@ export const mainCommand = defineCommand({
     delete: () => import("./commands/delete.ts").then((m) => m.default),
     dm: () => import("./commands/dm.ts").then((m) => m.default),
     edit: () => import("./commands/edit.ts").then((m) => m.default),
+    "mark-read": () => import("./commands/mark-read.ts").then((m) => m.default),
     me: () => import("./commands/me.ts").then((m) => m.default),
     post: () => import("./commands/post.ts").then((m) => m.default),
     posts: () => import("./commands/posts.ts").then((m) => m.default),
