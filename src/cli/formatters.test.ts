@@ -26,7 +26,7 @@ function makeUser(overrides: Partial<User> = {}): User {
     update_at: 0,
     delete_at: 0,
     ...overrides,
-  }
+  } as User
 }
 
 function makePost(overrides: Partial<Post> = {}): Post {
@@ -45,7 +45,7 @@ function makePost(overrides: Partial<Post> = {}): Post {
     props: {},
     hashtags: "",
     ...overrides,
-  }
+  } as Post
 }
 
 function makeChannel(overrides: Partial<Channel> = {}): Channel {
@@ -63,7 +63,7 @@ function makeChannel(overrides: Partial<Channel> = {}): Channel {
     total_msg_count: 0,
     last_post_at: 0,
     ...overrides,
-  }
+  } as Channel
 }
 
 describe("formatUser", () => {
