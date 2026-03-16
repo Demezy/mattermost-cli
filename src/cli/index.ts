@@ -19,6 +19,7 @@ export const mainCommand = defineCommand({
     posts: () => import("./commands/posts.ts").then((m) => m.default),
     react: () => import("./commands/react.ts").then((m) => m.default),
     reply: () => import("./commands/reply.ts").then((m) => m.default),
+    schema: () => import("./commands/schema.ts").then((m) => m.default),
     search: () => import("./commands/search.ts").then((m) => m.default),
     send: () => import("./commands/send.ts").then((m) => m.default),
     thread: () => import("./commands/thread.ts").then((m) => m.default),
