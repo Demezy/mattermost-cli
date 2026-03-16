@@ -5,6 +5,11 @@ import {
   formatPost,
   formatPosts,
   formatThread,
+  userToData,
+  channelsToData,
+  postsToData,
+  postToData,
+  threadToData,
 } from "./formatters.ts"
 import type { Channel, Post, User } from "../api/types.ts"
 
@@ -63,51 +68,85 @@ function makeChannel(overrides: Partial<Channel> = {}): Channel {
 
 describe("formatUser", () => {
   it("formats user as text", () => {
-    const output = formatUser(makeUser())
-    expect(output).toContain("@alice")
-    expect(output).toContain("Alice Smith")
-    expect(output).toContain("alice@example.com")
+    const result = formatUser(makeUser())
+    expect(result).toContain("@alice")
+    expect(result).toContain("Alice Smith")
+    expect(result).toContain("alice@example.com")
   })
+})
 
-  it("formats user as JSON", () => {
-    const output = formatUser(makeUser(), { json: true })
-    const parsed = JSON.parse(output)
-    expect(parsed.username).toBe("alice")
+describe("userToData", () => {
+  it("returns the user object", () => {
+    const user = makeUser()
+    expect(userToData(user)).toBe(user)
   })
 })
 
 describe("formatChannels", () => {
   it("formats channels as a table", () => {
-    const output = formatChannels([makeChannel()])
-    expect(output).toContain("ID\tType\tName")
-    expect(output).toContain("ch1")
-    expect(output).toContain("public")
-    expect(output).toContain("Town Square")
+    const result = formatChannels([makeChannel()])
+    expect(result).toContain("ID\tType\tName")
+    expect(result).toContain("ch1")
+    expect(result).toContain("public")
+    expect(result).toContain("Town Square")
   })
+})
 
-  it("formats channels as JSON", () => {
-    const output = formatChannels([makeChannel()], { json: true })
-    const parsed = JSON.parse(output)
-    expect(parsed).toHaveLength(1)
-    expect(parsed[0].id).toBe("ch1")
+describe("channelsToData", () => {
+  it("returns the channels array", () => {
+    const channels = [makeChannel()]
+    const data = channelsToData(channels)
+    expect(data).toHaveLength(1)
+    expect(data[0].id).toBe("ch1")
   })
 })
 
 describe("formatPost", () => {
   it("renders author and message", () => {
-    const output = formatPost(makePost({ message: "Hello world" }), makeUser())
-    expect(output).toContain("@alice")
-    expect(output).toContain("Hello world")
+    const result = formatPost(makePost({ message: "Hello world" }), makeUser())
+    expect(result).toContain("@alice")
+    expect(result).toContain("Hello world")
   })
 
   it("renders null author as @<user_id>", () => {
-    const output = formatPost(makePost({ user_id: "u999" }), null)
-    expect(output).toContain("@<u999>")
+    const result = formatPost(makePost({ user_id: "u999" }), null)
+    expect(result).toContain("@<u999>")
   })
 
   it("indents when requested", () => {
-    const output = formatPost(makePost(), makeUser(), { indent: true })
-    expect(output).toMatch(/^ {2}@alice/m)
+    const result = formatPost(makePost(), makeUser(), { indent: true })
+    expect(result).toMatch(/^ {2}@alice/m)
+  })
+})
+
+describe("postToData", () => {
+  it("shapes post data with author", () => {
+    const data = postToData(makePost(), makeUser())
+    expect(data.id).toBe("p1")
+    expect(data.author?.username).toBe("alice")
+    expect(data.message).toBe("hello")
+    expect(data.createdAt).toContain("2024-01-15")
+  })
+
+  it("handles null author", () => {
+    const data = postToData(makePost(), null)
+    expect(data.author).toBeNull()
+  })
+})
+
+describe("postsToData", () => {
+  it("shapes array of posts", () => {
+    const entries = [{ post: makePost(), author: makeUser() }]
+    const data = postsToData(entries)
+    expect(data).toHaveLength(1)
+    expect(data[0].id).toBe("p1")
+    expect(data[0].author?.username).toBe("alice")
+  })
+
+  it("handles null author in array", () => {
+    const entries = [{ post: makePost(), author: null }]
+    const data = postsToData(entries)
+    expect(data[0].author).toBeNull()
   })
 })
 
@@ -117,26 +156,22 @@ describe("formatPosts", () => {
       { post: makePost({ message: "First" }), author: makeUser() },
       { post: makePost({ id: "p2", message: "Second" }), author: makeUser({ username: "bob" }) },
     ]
-    const output = formatPosts(entries)
-    expect(output).toContain("First")
-    expect(output).toContain("Second")
-    expect(output).toContain("---")
+    const result = formatPosts(entries)
+    expect(result).toContain("First")
+    expect(result).toContain("Second")
+    expect(result).toContain("---")
   })
+})
 
-  it("formats posts as JSON", () => {
-    const entries = [{ post: makePost(), author: makeUser() }]
-    const output = formatPosts(entries, { json: true })
-    const parsed = JSON.parse(output)
-    expect(parsed).toHaveLength(1)
-    expect(parsed[0].id).toBe("p1")
-    expect(parsed[0].author.username).toBe("alice")
-  })
-
-  it("renders null author in JSON", () => {
-    const entries = [{ post: makePost(), author: null }]
-    const output = formatPosts(entries, { json: true })
-    const parsed = JSON.parse(output)
-    expect(parsed[0].author).toBeNull()
+describe("threadToData", () => {
+  it("shapes thread data with rootId", () => {
+    const entries = [
+      { post: makePost({ id: "root" }), author: makeUser() },
+      { post: makePost({ id: "reply", root_id: "root" }), author: makeUser({ username: "bob" }) },
+    ]
+    const data = threadToData(entries)
+    expect(data.rootId).toBe("root")
+    expect(data.posts).toHaveLength(2)
   })
 })
 
@@ -149,20 +184,9 @@ describe("formatThread", () => {
         author: makeUser({ username: "bob" }),
       },
     ]
-    const output = formatThread(entries)
-    expect(output).toContain("@alice")
-    expect(output).toMatch(/^ {2}@bob/m)
-    expect(output).toContain("---")
-  })
-
-  it("formats thread as JSON", () => {
-    const entries = [
-      { post: makePost({ id: "root" }), author: makeUser() },
-      { post: makePost({ id: "reply", root_id: "root" }), author: makeUser({ username: "bob" }) },
-    ]
-    const output = formatThread(entries, { json: true })
-    const parsed = JSON.parse(output)
-    expect(parsed.rootId).toBe("root")
-    expect(parsed.posts).toHaveLength(2)
+    const result = formatThread(entries)
+    expect(result).toContain("@alice")
+    expect(result).toMatch(/^ {2}@bob/m)
+    expect(result).toContain("---")
   })
 })

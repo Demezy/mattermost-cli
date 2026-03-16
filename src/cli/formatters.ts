@@ -1,9 +1,44 @@
 import type { Channel, Post, User } from "../api/types.ts"
 
-export function formatUser(user: User, opts?: { json?: boolean }): string {
-  if (opts?.json) {
-    return JSON.stringify(user)
+// --- Data-shaping functions (for JSON envelope) ---
+
+export function userToData(user: User) {
+  return user
+}
+
+export function channelToData(channel: Channel) {
+  return channel
+}
+
+export function channelsToData(channels: Channel[]) {
+  return channels
+}
+
+export function postToData(post: Post, author: User | null) {
+  return {
+    id: post.id,
+    author: author ? { id: author.id, username: author.username } : null,
+    message: post.message,
+    createdAt: new Date(post.create_at).toISOString(),
+    rootId: post.root_id || undefined,
   }
+}
+
+export function postsToData(entries: Array<{ post: Post; author: User | null }>) {
+  return entries.map((e) => postToData(e.post, e.author))
+}
+
+export function threadToData(entries: Array<{ post: Post; author: User | null }>) {
+  const rootId = entries.length > 0 ? (entries[0].post.root_id || entries[0].post.id) : ""
+  return {
+    rootId,
+    posts: entries.map((e) => postToData(e.post, e.author)),
+  }
+}
+
+// --- Text formatting functions (for human-readable output) ---
+
+export function formatUser(user: User): string {
   const name = [user.first_name, user.last_name].filter(Boolean).join(" ")
   const parts = [`@${user.username}`]
   if (name) parts[0] += ` (${name})`
@@ -11,18 +46,12 @@ export function formatUser(user: User, opts?: { json?: boolean }): string {
   return parts.join("\n")
 }
 
-export function formatChannel(channel: Channel, opts?: { json?: boolean }): string {
-  if (opts?.json) {
-    return JSON.stringify(channel)
-  }
+export function formatChannel(channel: Channel): string {
   const typeLabel: Record<string, string> = { O: "public", P: "private", D: "DM", G: "GM" }
   return `${channel.id}\t${typeLabel[channel.type] ?? channel.type}\t${channel.display_name || channel.name}`
 }
 
-export function formatChannels(channels: Channel[], opts?: { json?: boolean }): string {
-  if (opts?.json) {
-    return JSON.stringify(channels)
-  }
+export function formatChannels(channels: Channel[]): string {
   const header = "ID\tType\tName"
   const rows = channels.map((ch) => formatChannel(ch))
   return [header, ...rows].join("\n")
@@ -53,23 +82,9 @@ export function formatPost(
   return lines.join("\n")
 }
 
-function postToJson(post: Post, author: User | null) {
-  return {
-    id: post.id,
-    author: author ? { id: author.id, username: author.username } : null,
-    message: post.message,
-    createdAt: new Date(post.create_at).toISOString(),
-    rootId: post.root_id || undefined,
-  }
-}
-
 export function formatPosts(
   entries: Array<{ post: Post; author: User | null }>,
-  opts?: { json?: boolean },
 ): string {
-  if (opts?.json) {
-    return JSON.stringify(entries.map((e) => postToJson(e.post, e.author)))
-  }
   const lines: string[] = []
   for (const { post, author } of entries) {
     lines.push(formatPost(post, author))
@@ -82,15 +97,7 @@ export function formatPosts(
 
 export function formatThread(
   entries: Array<{ post: Post; author: User | null }>,
-  opts?: { json?: boolean },
 ): string {
-  if (opts?.json) {
-    const rootId = entries.length > 0 ? (entries[0].post.root_id || entries[0].post.id) : ""
-    return JSON.stringify({
-      rootId,
-      posts: entries.map((e) => postToJson(e.post, e.author)),
-    })
-  }
   const lines: string[] = []
   for (const { post, author } of entries) {
     const isReply = !!post.root_id
