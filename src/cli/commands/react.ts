@@ -2,6 +2,7 @@ import { defineCommand } from "citty"
 import { loadConnectionConfig } from "../../config/index.ts"
 import { createClient } from "../../api/client.ts"
 import { globalArgs } from "../global-args.ts"
+import { output } from "../output.ts"
 
 export default defineCommand({
   meta: {
@@ -32,11 +33,7 @@ export default defineCommand({
 
     if (args["dry-run"]) {
       const preview = { action: "react", postId: args["post-id"], emoji }
-      if (args.json) {
-        console.log(JSON.stringify(preview))
-      } else {
-        console.log(`Would react with :${emoji}: on post ${args["post-id"]}`)
-      }
+      output(preview, `Would react with :${emoji}: on post ${args["post-id"]}`, { json: args.json, fields: args.fields })
       return
     }
 
@@ -52,10 +49,6 @@ export default defineCommand({
       emoji_name: emoji,
     })
 
-    if (args.json) {
-      console.log(JSON.stringify(reaction))
-    } else {
-      console.log(`Reacted with :${emoji}: on post ${args["post-id"]}`)
-    }
+    output(reaction, `Reacted with :${emoji}: on post ${args["post-id"]}`, { json: args.json, fields: args.fields })
   },
 })

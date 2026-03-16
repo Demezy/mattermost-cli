@@ -2,7 +2,8 @@ import { defineCommand } from "citty"
 import { loadConnectionConfig } from "../../config/index.ts"
 import { createClient } from "../../api/client.ts"
 import { globalArgs } from "../global-args.ts"
-import { formatChannels } from "../formatters.ts"
+import { formatChannels, channelsToData } from "../formatters.ts"
+import { output } from "../output.ts"
 
 export default defineCommand({
   meta: {
@@ -38,6 +39,6 @@ export default defineCommand({
           ch.display_name.toLowerCase().includes(filter),
       )
     }
-    console.log(formatChannels(channels, { json: args.json }))
+    output(channelsToData(channels), formatChannels(channels), { json: args.json, fields: args.fields })
   },
 })

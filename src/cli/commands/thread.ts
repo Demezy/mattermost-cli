@@ -3,9 +3,10 @@ import { loadConnectionConfig } from "../../config/index.ts"
 import { createClient } from "../../api/client.ts"
 import type { Post } from "../../api/types.ts"
 import { globalArgs } from "../global-args.ts"
-import { formatThread } from "../formatters.ts"
+import { formatThread, threadToData } from "../formatters.ts"
 import { parseMattermostUrl } from "../../utils/url-parser.ts"
 import { resolveUsers } from "../../utils/users.ts"
+import { output } from "../output.ts"
 
 export default defineCommand({
   meta: {
@@ -68,6 +69,6 @@ export default defineCommand({
       author: users.get(post.user_id) ?? null,
     }))
 
-    console.log(formatThread(entries, { json: args.json }))
+    output(threadToData(entries), formatThread(entries), { json: args.json, fields: args.fields })
   },
 })

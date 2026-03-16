@@ -3,6 +3,7 @@ import { loadConnectionConfig } from "../../config/index.ts"
 import { createClient } from "../../api/client.ts"
 import { globalArgs } from "../global-args.ts"
 import { parseMattermostUrl } from "../../utils/url-parser.ts"
+import { output } from "../output.ts"
 
 export default defineCommand({
   meta: {
@@ -69,12 +70,7 @@ export default defineCommand({
         rootId,
         message,
       }
-      if (args.json) {
-        console.log(JSON.stringify(preview))
-      } else {
-        console.log(`Would reply to thread ${rootId} in channel ${channelId}:`)
-        console.log(message)
-      }
+      output(preview, `Would reply to thread ${rootId} in channel ${channelId}:\n${message}`, { json: args.json, fields: args.fields })
       return
     }
 
@@ -84,10 +80,10 @@ export default defineCommand({
       message,
     })
 
-    if (args.json) {
-      console.log(JSON.stringify({ id: created.id, message: created.message }))
-    } else {
-      console.log(`Reply posted (${created.id})`)
-    }
+    output(
+      { id: created.id, message: created.message },
+      `Reply posted (${created.id})`,
+      { json: args.json, fields: args.fields },
+    )
   },
 })

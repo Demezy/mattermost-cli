@@ -2,7 +2,8 @@ import { defineCommand } from "citty"
 import { loadConnectionConfig } from "../../config/index.ts"
 import { createClient } from "../../api/client.ts"
 import { globalArgs } from "../global-args.ts"
-import { formatUser } from "../formatters.ts"
+import { formatUser, userToData } from "../formatters.ts"
+import { output } from "../output.ts"
 
 export default defineCommand({
   meta: {
@@ -16,6 +17,6 @@ export default defineCommand({
     const config = loadConnectionConfig()
     const client = createClient({ url: config.url, token: config.token })
     const user = await client.getMe()
-    console.log(formatUser(user, { json: args.json }))
+    output(userToData(user), formatUser(user), { json: args.json, fields: args.fields })
   },
 })

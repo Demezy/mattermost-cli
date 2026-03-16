@@ -2,6 +2,7 @@ import { defineCommand } from "citty"
 import { loadConnectionConfig } from "../../config/index.ts"
 import { createClient } from "../../api/client.ts"
 import { globalArgs } from "../global-args.ts"
+import { output } from "../output.ts"
 
 export default defineCommand({
   meta: {
@@ -43,21 +44,16 @@ export default defineCommand({
         postId: args["post-id"],
         message: args.message,
       }
-      if (args.json) {
-        console.log(JSON.stringify(preview))
-      } else {
-        console.log(`Would edit post ${args["post-id"]}:`)
-        console.log(args.message)
-      }
+      output(preview, `Would edit post ${args["post-id"]}:\n${args.message}`, { json: args.json, fields: args.fields })
       return
     }
 
     const updated = await client.patchPost(args["post-id"], { message: args.message })
 
-    if (args.json) {
-      console.log(JSON.stringify({ id: updated.id, message: updated.message }))
-    } else {
-      console.log(`Post edited (${updated.id})`)
-    }
+    output(
+      { id: updated.id, message: updated.message },
+      `Post edited (${updated.id})`,
+      { json: args.json, fields: args.fields },
+    )
   },
 })

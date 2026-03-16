@@ -2,6 +2,7 @@ import { defineCommand } from "citty"
 import { loadConnectionConfig } from "../../config/index.ts"
 import { createClient } from "../../api/client.ts"
 import { globalArgs } from "../global-args.ts"
+import { output } from "../output.ts"
 
 export default defineCommand({
   meta: {
@@ -53,19 +54,17 @@ export default defineCommand({
     // Sort by mention count (desc), then unread count (desc)
     unread.sort((a, b) => b.mentionCount - a.mentionCount || b.unreadCount - a.unreadCount)
 
+    const data = unread.map((u) => ({
+      id: u.channel.id,
+      name: u.channel.display_name || u.channel.name,
+      type: u.channel.type,
+      unread: u.unreadCount,
+      mentions: u.mentionCount,
+      muted: u.muted,
+    }))
+
     if (args.json) {
-      console.log(
-        JSON.stringify(
-          unread.map((u) => ({
-            id: u.channel.id,
-            name: u.channel.display_name || u.channel.name,
-            type: u.channel.type,
-            unread: u.unreadCount,
-            mentions: u.mentionCount,
-            muted: u.muted,
-          })),
-        ),
-      )
+      output(data, "", { json: true, fields: args.fields })
       return
     }
 
@@ -75,11 +74,12 @@ export default defineCommand({
     }
 
     const typeLabel: Record<string, string> = { O: "public", P: "private", D: "DM", G: "GM" }
-    console.log("Channel\tType\tUnread\tMentions")
+    const lines = ["Channel\tType\tUnread\tMentions"]
     for (const { channel, unreadCount, mentionCount } of unread) {
       const name = channel.display_name || channel.name
       const type = typeLabel[channel.type] ?? channel.type
-      console.log(`${name}\t${type}\t${unreadCount}\t${mentionCount}`)
+      lines.push(`${name}\t${type}\t${unreadCount}\t${mentionCount}`)
     }
+    console.log(lines.join("\n"))
   },
 })

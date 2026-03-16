@@ -2,6 +2,7 @@ import { defineCommand } from "citty"
 import { loadConnectionConfig } from "../../config/index.ts"
 import { createClient } from "../../api/client.ts"
 import { globalArgs } from "../global-args.ts"
+import { output } from "../output.ts"
 
 export default defineCommand({
   meta: {
@@ -35,11 +36,7 @@ export default defineCommand({
 
     if (args["dry-run"]) {
       const preview = { action: "delete", postId: args["post-id"] }
-      if (args.json) {
-        console.log(JSON.stringify(preview))
-      } else {
-        console.log(`Would delete post ${args["post-id"]}`)
-      }
+      output(preview, `Would delete post ${args["post-id"]}`, { json: args.json, fields: args.fields })
       return
     }
 
@@ -49,10 +46,10 @@ export default defineCommand({
 
     await client.deletePost(args["post-id"])
 
-    if (args.json) {
-      console.log(JSON.stringify({ id: args["post-id"], deleted: true }))
-    } else {
-      console.log(`Post deleted (${args["post-id"]})`)
-    }
+    output(
+      { id: args["post-id"], deleted: true },
+      `Post deleted (${args["post-id"]})`,
+      { json: args.json, fields: args.fields },
+    )
   },
 })

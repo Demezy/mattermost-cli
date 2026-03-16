@@ -2,6 +2,7 @@ import { defineCommand } from "citty"
 import { loadConnectionConfig } from "../../config/index.ts"
 import { createClient } from "../../api/client.ts"
 import { globalArgs } from "../global-args.ts"
+import { output } from "../output.ts"
 
 export default defineCommand({
   meta: {
@@ -51,12 +52,7 @@ export default defineCommand({
         toId: target.id,
         message: args.message,
       }
-      if (args.json) {
-        console.log(JSON.stringify(preview))
-      } else {
-        console.log(`Would send DM to @${username}:`)
-        console.log(args.message)
-      }
+      output(preview, `Would send DM to @${username}:\n${args.message}`, { json: args.json, fields: args.fields })
       return
     }
 
@@ -67,10 +63,10 @@ export default defineCommand({
       message: args.message,
     })
 
-    if (args.json) {
-      console.log(JSON.stringify({ id: created.id, to: username, message: created.message }))
-    } else {
-      console.log(`DM sent to @${username} (${created.id})`)
-    }
+    output(
+      { id: created.id, to: username, message: created.message },
+      `DM sent to @${username} (${created.id})`,
+      { json: args.json, fields: args.fields },
+    )
   },
 })

@@ -2,8 +2,9 @@ import { defineCommand } from "citty"
 import { loadConnectionConfig } from "../../config/index.ts"
 import { createClient } from "../../api/client.ts"
 import { globalArgs } from "../global-args.ts"
-import { formatPosts } from "../formatters.ts"
+import { formatPosts, postsToData } from "../formatters.ts"
 import { resolveUsers } from "../../utils/users.ts"
+import { output } from "../output.ts"
 
 export default defineCommand({
   meta: {
@@ -63,6 +64,6 @@ export default defineCommand({
       author: users.get(post.user_id) ?? null,
     }))
 
-    console.log(formatPosts(entries, { json: args.json }))
+    output(postsToData(entries), formatPosts(entries), { json: args.json, fields: args.fields })
   },
 })

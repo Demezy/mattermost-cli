@@ -3,6 +3,8 @@ import { loadConnectionConfig } from "../../config/index.ts"
 import { createClient } from "../../api/client.ts"
 import { globalArgs } from "../global-args.ts"
 import { resolveChannel } from "../../utils/channels.ts"
+import { channelToData } from "../formatters.ts"
+import { output } from "../output.ts"
 
 export default defineCommand({
   meta: {
@@ -39,17 +41,14 @@ export default defineCommand({
       ? await client.getChannel(args.id)
       : await resolveChannel(client, args.name!.replace(/^#/, ""), teamId)
 
-    if (args.json) {
-      console.log(JSON.stringify(channel))
-    } else {
-      const typeLabel: Record<string, string> = { O: "public", P: "private", D: "DM", G: "GM" }
-      const lines: string[] = []
-      lines.push(`${channel.display_name || channel.name} (${typeLabel[channel.type] ?? channel.type})`)
-      lines.push(`ID: ${channel.id}`)
-      if (channel.header) lines.push(`Header: ${channel.header}`)
-      if (channel.purpose) lines.push(`Purpose: ${channel.purpose}`)
-      lines.push(`Messages: ${channel.total_msg_count}`)
-      console.log(lines.join("\n"))
-    }
+    const typeLabel: Record<string, string> = { O: "public", P: "private", D: "DM", G: "GM" }
+    const lines: string[] = []
+    lines.push(`${channel.display_name || channel.name} (${typeLabel[channel.type] ?? channel.type})`)
+    lines.push(`ID: ${channel.id}`)
+    if (channel.header) lines.push(`Header: ${channel.header}`)
+    if (channel.purpose) lines.push(`Purpose: ${channel.purpose}`)
+    lines.push(`Messages: ${channel.total_msg_count}`)
+
+    output(channelToData(channel), lines.join("\n"), { json: args.json, fields: args.fields })
   },
 })

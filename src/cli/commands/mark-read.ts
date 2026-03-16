@@ -3,6 +3,7 @@ import { loadConnectionConfig } from "../../config/index.ts"
 import { createClient } from "../../api/client.ts"
 import { resolveChannel } from "../../utils/channels.ts"
 import { globalArgs } from "../global-args.ts"
+import { output } from "../output.ts"
 
 export default defineCommand({
   meta: {
@@ -38,11 +39,7 @@ export default defineCommand({
     if (args["dry-run"]) {
       const mode = args.thread ? "thread" : "channel"
       const preview = { action: "mark-read", mode, target }
-      if (args.json) {
-        console.log(JSON.stringify(preview))
-      } else {
-        console.log(`Would mark ${mode} ${target} as read`)
-      }
+      output(preview, `Would mark ${mode} ${target} as read`, { json: args.json, fields: args.fields })
       return
     }
 
@@ -60,20 +57,20 @@ export default defineCommand({
         return
       }
       await client.markThreadAsRead(me.id, teamId, target, Date.now())
-      if (args.json) {
-        console.log(JSON.stringify({ status: "ok", mode: "thread", target }))
-      } else {
-        console.log(`Marked thread ${target} as read`)
-      }
+      output(
+        { status: "ok", mode: "thread", target },
+        `Marked thread ${target} as read`,
+        { json: args.json, fields: args.fields },
+      )
     } else {
       const channel = await resolveChannel(client, target, teamId)
       await client.viewChannel(me.id, channel.id)
-      if (args.json) {
-        console.log(JSON.stringify({ status: "ok", mode: "channel", target, channelId: channel.id }))
-      } else {
-        const name = channel.display_name || channel.name
-        console.log(`Marked channel ${name} as read`)
-      }
+      const name = channel.display_name || channel.name
+      output(
+        { status: "ok", mode: "channel", target, channelId: channel.id },
+        `Marked channel ${name} as read`,
+        { json: args.json, fields: args.fields },
+      )
     }
   },
 })

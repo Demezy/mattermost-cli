@@ -3,6 +3,7 @@ import { loadConnectionConfig } from "../../config/index.ts"
 import { createClient } from "../../api/client.ts"
 import { globalArgs } from "../global-args.ts"
 import { resolveChannel } from "../../utils/channels.ts"
+import { output } from "../output.ts"
 
 export default defineCommand({
   meta: {
@@ -52,12 +53,7 @@ export default defineCommand({
         channelName: channel.name,
         message: args.message,
       }
-      if (args.json) {
-        console.log(JSON.stringify(preview))
-      } else {
-        console.log(`Would post to #${channel.name} (${channel.id}):`)
-        console.log(args.message)
-      }
+      output(preview, `Would post to #${channel.name} (${channel.id}):\n${args.message}`, { json: args.json, fields: args.fields })
       return
     }
 
@@ -66,10 +62,10 @@ export default defineCommand({
       message: args.message,
     })
 
-    if (args.json) {
-      console.log(JSON.stringify({ id: created.id, message: created.message }))
-    } else {
-      console.log(`Message posted to #${channel.name} (${created.id})`)
-    }
+    output(
+      { id: created.id, message: created.message },
+      `Message posted to #${channel.name} (${created.id})`,
+      { json: args.json, fields: args.fields },
+    )
   },
 })
