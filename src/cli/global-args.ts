@@ -11,4 +11,8 @@ export const globalArgs = {
     description: "Show verbose output",
     default: false,
   },
+  fields: {
+    type: "string",
+    description: "Comma-separated fields to include in JSON output",
+  },
 } as const satisfies ArgsDef
