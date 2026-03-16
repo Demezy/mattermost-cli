@@ -46,9 +46,9 @@ export default defineCommand({
       if (!channel) continue
       const muted = member.notify_props?.mark_unread === "mention"
       if (muted && !args["show-muted"]) continue
-      const unreadCount = channel.total_msg_count - member.msg_count
-      if (unreadCount <= 0 && member.mention_count <= 0) continue
-      unread.push({ channel, unreadCount, mentionCount: member.mention_count, muted })
+      const unreadCount = channel.total_msg_count_root - member.msg_count_root
+      if (unreadCount <= 0 && member.mention_count_root <= 0) continue
+      unread.push({ channel, unreadCount, mentionCount: member.mention_count_root, muted })
     }
 
     // Sort by mention count (desc), then unread count (desc)

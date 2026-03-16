@@ -14,9 +14,10 @@ function makeChannel(overrides: Partial<Channel> = {}): Channel {
     update_at: 0,
     delete_at: 0,
     total_msg_count: 100,
+    total_msg_count_root: 100,
     last_post_at: 0,
     ...overrides,
-  }
+  } as Channel
 }
 
 function makeMember(overrides: Partial<ChannelMember> = {}): ChannelMember {
@@ -24,22 +25,24 @@ function makeMember(overrides: Partial<ChannelMember> = {}): ChannelMember {
     channel_id: "ch1",
     user_id: "u1",
     msg_count: 90,
+    msg_count_root: 90,
     mention_count: 0,
+    mention_count_root: 0,
     last_viewed_at: 0,
     last_update_at: 0,
     ...overrides,
-  }
+  } as ChannelMember
 }
 
 describe("unread muted filtering", () => {
   it("filters out muted channels by default", () => {
     const members: ChannelMember[] = [
-      makeMember({ channel_id: "ch1", msg_count: 90 }),
-      makeMember({ channel_id: "ch2", msg_count: 90, notify_props: { mark_unread: "mention" } }),
+      makeMember({ channel_id: "ch1", msg_count_root: 90 }),
+      makeMember({ channel_id: "ch2", msg_count_root: 90, notify_props: { mark_unread: "mention" } }),
     ]
     const channels: Channel[] = [
       makeChannel({ id: "ch1", display_name: "General" }),
-      makeChannel({ id: "ch2", display_name: "Muted Channel", total_msg_count: 100 }),
+      makeChannel({ id: "ch2", display_name: "Muted Channel", total_msg_count_root: 100 }),
     ]
 
     const channelMap = new Map(channels.map((ch) => [ch.id, ch]))
@@ -51,9 +54,9 @@ describe("unread muted filtering", () => {
       if (!channel) continue
       const muted = member.notify_props?.mark_unread === "mention"
       if (muted && !showMuted) continue
-      const unreadCount = channel.total_msg_count - member.msg_count
-      if (unreadCount <= 0 && member.mention_count <= 0) continue
-      unread.push({ channel, unreadCount, mentionCount: member.mention_count, muted })
+      const unreadCount = channel.total_msg_count_root - member.msg_count_root
+      if (unreadCount <= 0 && member.mention_count_root <= 0) continue
+      unread.push({ channel, unreadCount, mentionCount: member.mention_count_root, muted })
     }
 
     expect(unread).toHaveLength(1)
@@ -62,12 +65,12 @@ describe("unread muted filtering", () => {
 
   it("includes muted channels when --show-muted is set", () => {
     const members: ChannelMember[] = [
-      makeMember({ channel_id: "ch1", msg_count: 90 }),
-      makeMember({ channel_id: "ch2", msg_count: 90, notify_props: { mark_unread: "mention" } }),
+      makeMember({ channel_id: "ch1", msg_count_root: 90 }),
+      makeMember({ channel_id: "ch2", msg_count_root: 90, notify_props: { mark_unread: "mention" } }),
     ]
     const channels: Channel[] = [
       makeChannel({ id: "ch1", display_name: "General" }),
-      makeChannel({ id: "ch2", display_name: "Muted Channel", total_msg_count: 100 }),
+      makeChannel({ id: "ch2", display_name: "Muted Channel", total_msg_count_root: 100 }),
     ]
 
     const channelMap = new Map(channels.map((ch) => [ch.id, ch]))
@@ -79,9 +82,9 @@ describe("unread muted filtering", () => {
       if (!channel) continue
       const muted = member.notify_props?.mark_unread === "mention"
       if (muted && !showMuted) continue
-      const unreadCount = channel.total_msg_count - member.msg_count
-      if (unreadCount <= 0 && member.mention_count <= 0) continue
-      unread.push({ channel, unreadCount, mentionCount: member.mention_count, muted })
+      const unreadCount = channel.total_msg_count_root - member.msg_count_root
+      if (unreadCount <= 0 && member.mention_count_root <= 0) continue
+      unread.push({ channel, unreadCount, mentionCount: member.mention_count_root, muted })
     }
 
     expect(unread).toHaveLength(2)
@@ -89,7 +92,7 @@ describe("unread muted filtering", () => {
   })
 
   it("includes muted field in JSON output shape", () => {
-    const member = makeMember({ channel_id: "ch1", msg_count: 90 })
+    const member = makeMember({ channel_id: "ch1", msg_count_root: 90 })
     const channel = makeChannel({ id: "ch1" })
     const muted = member.notify_props?.mark_unread === "mention"
 
@@ -97,8 +100,8 @@ describe("unread muted filtering", () => {
       id: channel.id,
       name: channel.name,
       type: channel.type,
-      unread: channel.total_msg_count - member.msg_count,
-      mentions: member.mention_count,
+      unread: channel.total_msg_count_root - member.msg_count_root,
+      mentions: member.mention_count_root,
       muted,
     }
 
