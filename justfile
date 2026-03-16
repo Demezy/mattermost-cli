@@ -24,6 +24,10 @@ run *args:
 run-test *args:
     bun --env-file=.env.test bin/mm.ts {{args}}
 
+# Generate AGENTS.md from code
+agents-md:
+    bun bin/mm.ts schema --markdown > AGENTS.md
+
 # --- Docker ---
 
 # Start test Mattermost
