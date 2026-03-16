@@ -1,4 +1,4 @@
-# mm v0.1.2
+# mm v0.2.0
 
 CLI tool for interacting with Mattermost servers
 
