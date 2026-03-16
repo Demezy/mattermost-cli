@@ -95,7 +95,7 @@ describe("unread muted filtering", () => {
 
     const jsonEntry = {
       id: channel.id,
-      name: channel.display_name || channel.name,
+      name: channel.name,
       type: channel.type,
       unread: channel.total_msg_count - member.msg_count,
       mentions: member.mention_count,

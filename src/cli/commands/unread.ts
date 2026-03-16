@@ -56,7 +56,7 @@ export default defineCommand({
 
     const data = unread.map((u) => ({
       id: u.channel.id,
-      name: u.channel.display_name || u.channel.name,
+      name: u.channel.name,
       type: u.channel.type,
       unread: u.unreadCount,
       mentions: u.mentionCount,
@@ -76,7 +76,7 @@ export default defineCommand({
     const typeLabel: Record<string, string> = { O: "public", P: "private", D: "DM", G: "GM" }
     const lines = ["Channel\tType\tUnread\tMentions"]
     for (const { channel, unreadCount, mentionCount } of unread) {
-      const name = channel.display_name || channel.name
+      const name = channel.name
       const type = typeLabel[channel.type] ?? channel.type
       lines.push(`${name}\t${type}\t${unreadCount}\t${mentionCount}`)
     }
