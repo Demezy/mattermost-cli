@@ -31,6 +31,19 @@ export default defineCommand({
       type: "string",
       description: "Team ID (overrides MM_TEAM_ID)",
     },
+    grep: {
+      type: "string",
+      description: "Filter posts by case-insensitive substring match on message content",
+    },
+    "roots-only": {
+      type: "boolean",
+      description: "Only show root posts (exclude replies)",
+      default: false,
+    },
+    from: {
+      type: "string",
+      description: "Filter by author username",
+    },
   },
   async run({ args }) {
     const config = loadConnectionConfig()
@@ -49,14 +62,29 @@ export default defineCommand({
       .map((id) => postList.posts[id])
       .reverse()
 
+    // Filter to root posts only if requested
+    const filtered = args["roots-only"]
+      ? orderedPosts.filter((p) => !p.root_id)
+      : orderedPosts
+
     // Resolve unique authors
-    const userIds = [...new Set(orderedPosts.map((p) => p.user_id))]
+    const userIds = [...new Set(filtered.map((p) => p.user_id))]
     const users = await resolveUsers(client, userIds)
 
-    const entries = orderedPosts.map((post) => ({
+    let entries = filtered.map((post) => ({
       post,
       author: users.get(post.user_id) ?? null,
     }))
+
+    if (args.from) {
+      const target = args.from.toLowerCase()
+      entries = entries.filter((e) => e.author?.username.toLowerCase() === target)
+    }
+
+    if (args.grep) {
+      const pattern = args.grep.toLowerCase()
+      entries = entries.filter((e) => e.post.message.toLowerCase().includes(pattern))
+    }
 
     output(postsToData(entries), formatPosts(entries), { json: args.json, fields: args.fields })
   },

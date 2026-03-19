@@ -20,6 +20,10 @@ export default defineCommand({
       description: "Thread root post ID or permalink URL",
       required: true,
     },
+    grep: {
+      type: "string",
+      description: "Filter posts by case-insensitive substring match on message content",
+    },
   },
   async run({ args }) {
     const config = loadConnectionConfig()
@@ -64,10 +68,15 @@ export default defineCommand({
     const userIds = [...new Set(orderedPosts.map((p) => p.user_id))]
     const users = await resolveUsers(client, userIds)
 
-    const entries = orderedPosts.map((post) => ({
+    let entries = orderedPosts.map((post) => ({
       post,
       author: users.get(post.user_id) ?? null,
     }))
+
+    if (args.grep) {
+      const pattern = args.grep.toLowerCase()
+      entries = entries.filter((e) => e.post.message.toLowerCase().includes(pattern))
+    }
 
     output(threadToData(entries), formatThread(entries), { json: args.json, fields: args.fields })
   },

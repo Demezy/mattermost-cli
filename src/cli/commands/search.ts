@@ -15,7 +15,7 @@ export default defineCommand({
     ...globalArgs,
     query: {
       type: "positional",
-      description: "Search query (supports Mattermost search syntax: from:, in:, before:, after:)",
+      description: 'Search query. Supports Mattermost modifiers: from:user, in:channel, before:YYYY-MM-DD, after:YYYY-MM-DD. Example: "endpoint after:2026-03-17 from:d.nafikov in:monitoring". The --from and --channel flags are shortcuts for the from: and in: modifiers.',
       required: true,
     },
     channel: {
@@ -29,6 +29,10 @@ export default defineCommand({
     team: {
       type: "string",
       description: "Team ID (overrides MM_TEAM_ID)",
+    },
+    grep: {
+      type: "string",
+      description: "Filter posts by case-insensitive substring match on message content",
     },
   },
   async run({ args }) {
@@ -59,10 +63,15 @@ export default defineCommand({
     const userIds = [...new Set(orderedPosts.map((p) => p.user_id))]
     const users = await resolveUsers(client, userIds)
 
-    const entries = orderedPosts.map((post) => ({
+    let entries = orderedPosts.map((post) => ({
       post,
       author: users.get(post.user_id) ?? null,
     }))
+
+    if (args.grep) {
+      const pattern = args.grep.toLowerCase()
+      entries = entries.filter((e) => e.post.message.toLowerCase().includes(pattern))
+    }
 
     output(postsToData(entries), formatPosts(entries), { json: args.json, fields: args.fields })
   },
