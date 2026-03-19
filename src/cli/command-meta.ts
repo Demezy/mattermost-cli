@@ -16,6 +16,7 @@ export const commandAnnotations: Record<string, AgentAnnotations> = {
   thread:    { readOnly: true,  destructive: false, idempotent: true },
   search:    { readOnly: true,  destructive: false, idempotent: true },
   unread:    { readOnly: true,  destructive: false, idempotent: true },
+  dms:       { readOnly: true,  destructive: false, idempotent: true },
   schema:    { readOnly: true,  destructive: false, idempotent: true },
   // Write commands
   send:      { readOnly: false, destructive: false, idempotent: false },
