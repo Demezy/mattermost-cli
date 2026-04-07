@@ -106,5 +106,21 @@ export function createClient(config: ClientConfig): MattermostClient {
     markThreadAsRead: async (userId, teamId, threadId, timestamp) => {
       await request<unknown>("PUT", `/users/${userId}/teams/${teamId}/threads/${threadId}/read/${timestamp}`)
     },
+
+    getFileContent: async (fileId) => {
+      const res = await fetch(`${url}/api/v4/files/${fileId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as Record<string, unknown>
+        throw new MattermostApiError(
+          (body["message"] as string) ?? `HTTP ${res.status}`,
+          res.status,
+          body["id"] as string | undefined,
+          `GET /files/${fileId}`,
+        )
+      }
+      return res.arrayBuffer()
+    },
   }
 }

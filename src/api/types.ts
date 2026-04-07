@@ -68,4 +68,5 @@ export interface MattermostClient {
   addReaction(reaction: { user_id: string; post_id: string; emoji_name: string }): Promise<Reaction>
   viewChannel(userId: string, channelId: string): Promise<void>
   markThreadAsRead(userId: string, teamId: string, threadId: string, timestamp: number): Promise<void>
+  getFileContent(fileId: string): Promise<ArrayBuffer>
 }

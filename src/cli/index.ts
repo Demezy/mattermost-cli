@@ -12,6 +12,7 @@ export const mainCommand = defineCommand({
     channels: () => import("./commands/channels.ts").then((m) => m.default),
     delete: () => import("./commands/delete.ts").then((m) => m.default),
     dm: () => import("./commands/dm.ts").then((m) => m.default),
+    download: () => import("./commands/download.ts").then((m) => m.default),
     dms: () => import("./commands/dms.ts").then((m) => m.default),
     edit: () => import("./commands/edit.ts").then((m) => m.default),
     "mark-read": () => import("./commands/mark-read.ts").then((m) => m.default),

@@ -17,6 +17,7 @@ export const commandAnnotations: Record<string, AgentAnnotations> = {
   search:    { readOnly: true,  destructive: false, idempotent: true },
   unread:    { readOnly: true,  destructive: false, idempotent: true },
   dms:       { readOnly: true,  destructive: false, idempotent: true },
+  download:  { readOnly: true,  destructive: false, idempotent: true },
   schema:    { readOnly: true,  destructive: false, idempotent: true },
   // Write commands
   send:      { readOnly: false, destructive: false, idempotent: false },
