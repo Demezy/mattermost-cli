@@ -1,6 +1,6 @@
 {
   "name": "mattermost-cli",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "CLI tool for interacting with Mattermost servers via the REST API",
   "type": "module",
   "bin": {
