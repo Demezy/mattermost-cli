@@ -1,4 +1,26 @@
-import type { Channel, Post, User } from "../api/types.ts"
+import type { Channel, Post, User, FileInfo } from "../api/types.ts"
+
+// --- Helpers ---
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function fileToData(f: FileInfo) {
+  return {
+    id: f.id,
+    name: f.name,
+    size: f.size,
+    mimeType: f.mime_type,
+    ...(f.width ? { width: f.width, height: f.height } : {}),
+  }
+}
+
+function getFiles(post: Post): FileInfo[] {
+  return (post.metadata as { files?: FileInfo[] })?.files ?? []
+}
 
 // --- Data-shaping functions (for JSON envelope) ---
 
@@ -15,12 +37,14 @@ export function channelsToData(channels: Channel[]) {
 }
 
 export function postToData(post: Post, author: User | null) {
+  const files = getFiles(post)
   return {
     id: post.id,
     author: author ? { id: author.id, username: author.username } : null,
     message: post.message,
     createdAt: new Date(post.create_at).toISOString(),
     rootId: post.root_id || undefined,
+    ...(files.length > 0 ? { attachments: files.map(fileToData) } : {}),
   }
 }
 
@@ -78,6 +102,11 @@ export function formatPost(
   lines.push(`${prefix}${authorName(author, post.user_id)} (${formatDate(post.create_at)})`)
   for (const line of post.message.split("\n")) {
     lines.push(`${prefix}${line}`)
+  }
+  for (const f of getFiles(post)) {
+    const size = formatFileSize(f.size)
+    const dims = f.width ? `, ${f.width}x${f.height}` : ""
+    lines.push(`${prefix}[attachment: ${f.name} (${f.mime_type}, ${size}${dims}) id:${f.id}]`)
   }
   return lines.join("\n")
 }

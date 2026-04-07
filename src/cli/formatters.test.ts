@@ -11,7 +11,7 @@ import {
   postToData,
   threadToData,
 } from "./formatters.ts"
-import type { Channel, Post, User } from "../api/types.ts"
+import type { Channel, FileInfo, Post, User } from "../api/types.ts"
 
 function makeUser(overrides: Partial<User> = {}): User {
   return {
@@ -101,6 +101,23 @@ describe("channelsToData", () => {
   })
 })
 
+function makePostWithFile(overrides: Partial<Post> = {}): Post {
+  return makePost({
+    metadata: {
+      files: [{
+        id: "f1",
+        name: "screenshot.png",
+        size: 512000,
+        mime_type: "image/png",
+        extension: "png",
+        width: 1920,
+        height: 1080,
+      } as FileInfo],
+    } as Post["metadata"],
+    ...overrides,
+  })
+}
+
 describe("formatPost", () => {
   it("renders author and message", () => {
     const result = formatPost(makePost({ message: "Hello world" }), makeUser())
@@ -117,6 +134,21 @@ describe("formatPost", () => {
     const result = formatPost(makePost(), makeUser(), { indent: true })
     expect(result).toMatch(/^ {2}@alice/m)
   })
+
+  it("renders file attachments", () => {
+    const result = formatPost(makePostWithFile(), makeUser())
+    expect(result).toContain("[attachment: screenshot.png (image/png, 500 KB, 1920x1080) id:f1]")
+  })
+
+  it("indents attachments in replies", () => {
+    const result = formatPost(makePostWithFile(), makeUser(), { indent: true })
+    expect(result).toMatch(/^ {2}\[attachment:/m)
+  })
+
+  it("omits attachment line when no files", () => {
+    const result = formatPost(makePost(), makeUser())
+    expect(result).not.toContain("[attachment:")
+  })
 })
 
 describe("postToData", () => {
@@ -131,6 +163,24 @@ describe("postToData", () => {
   it("handles null author", () => {
     const data = postToData(makePost(), null)
     expect(data.author).toBeNull()
+  })
+
+  it("includes attachments when files present", () => {
+    const data = postToData(makePostWithFile(), makeUser())
+    expect(data.attachments).toHaveLength(1)
+    expect(data.attachments![0]).toEqual({
+      id: "f1",
+      name: "screenshot.png",
+      size: 512000,
+      mimeType: "image/png",
+      width: 1920,
+      height: 1080,
+    })
+  })
+
+  it("omits attachments when no files", () => {
+    const data = postToData(makePost(), makeUser())
+    expect(data).not.toHaveProperty("attachments")
   })
 })
 
