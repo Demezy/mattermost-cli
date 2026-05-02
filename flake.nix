@@ -3,12 +3,17 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    bun2nix = {
+      url = "github:nix-community/bun2nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
     {
       self,
       nixpkgs,
+      bun2nix,
     }:
     let
       supportedSystems = [
@@ -19,46 +24,29 @@
       ];
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
       pkgsFor = system: nixpkgs.legacyPackages.${system};
-    in
-    let
+
       mkMm =
-        pkgs:
-        pkgs.stdenv.mkDerivation {
-          pname = "mm";
-          version = (builtins.fromJSON (builtins.readFile ./package.json)).version;
+        system: pkgs:
+        let
+          b2n = bun2nix.packages.${system}.default;
+        in
+        b2n.mkDerivation {
+          packageJson = ./package.json;
           src = ./.;
-
-          nativeBuildInputs = [
-            pkgs.bun
-            pkgs.makeWrapper
-          ];
-
-          dontStrip = true;
-          dontFixup = true;
-
-          buildPhase = ''
-            runHook preBuild
-            export HOME=$TMPDIR
-            bun install --frozen-lockfile
-            bun build --compile bin/mm.ts --outfile mm
-            runHook postBuild
-          '';
-
-          installPhase = ''
-            runHook preInstall
-            install -Dm755 mm $out/bin/mm
-            runHook postInstall
-          '';
+          bunDeps = b2n.fetchBunDeps { bunNix = ./bun.nix; };
+          pname = "mm";
+          module = "bin/mm.ts";
+          bunCompileToBytecode = false;
         };
     in
     {
       packages = forAllSystems (system: {
-        mm = mkMm (pkgsFor system);
-        default = self.packages.${system}.mm;
+        mm = mkMm system (pkgsFor system);
+        default = mkMm system (pkgsFor system);
       });
 
       overlays.default = final: prev: {
-        mm = mkMm final;
+        mm = mkMm final.stdenv.hostPlatform.system final;
       };
     };
 }

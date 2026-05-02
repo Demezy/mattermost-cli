@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "bun run bin/mm.ts",
     "test": "bun test",
-    "typecheck": "bun --bun tsc --noEmit"
+    "typecheck": "bun --bun tsc --noEmit",
+    "postinstall": "nix run github:nix-community/bun2nix -- -o bun.nix"
   },
   "dependencies": {
     "citty": "^0.2.1"
