@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 import { runCommand, showUsage } from "citty"
 import { mainCommand } from "../src/cli/index.ts"
 import { MattermostApiError, ReadOnlyError } from "../src/api/errors.ts"

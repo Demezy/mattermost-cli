@@ -4,7 +4,8 @@
   "description": "CLI tool for interacting with Mattermost servers via the REST API",
   "type": "module",
   "bin": {
-    "mm": "./bin/mm.ts"
+    "mm": "./bin/mm.ts",
+    "mattermost-cli": "./bin/mm.ts"
   },
   "scripts": {
     "dev": "bun run bin/mm.ts",
