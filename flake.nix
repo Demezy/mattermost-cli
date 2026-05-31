@@ -2,7 +2,7 @@
   description = "CLI tool for interacting with Mattermost servers";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     bun2nix = {
       url = "github:nix-community/bun2nix";
       inputs.nixpkgs.follows = "nixpkgs";
